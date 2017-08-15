@@ -13,24 +13,11 @@
     tools:context="com.example.hasnaa.orangelabstask.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <LinearLayout
+    <android.support.v7.widget.SearchView
+        android:id="@+id/search1"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content">
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
-            android:id="@+id/search_word"
-            android:focusable="true"
-            android:hint="enter a word here!" />
-        <ImageButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:id="@+id/search_button"
-            android:src="@android:drawable/ic_menu_search"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:clickable="true" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
@@ -47,4 +34,10 @@
         android:gravity="center"
         android:visibility="gone"
         android:text="no data available"/>
+    <ProgressBar
+        android:id="@+id/loading_indicator"
+        android:layout_height="50dp"
+        android:layout_width="50dp"
+        android:layout_gravity="center"
+        android:visibility="invisible" />
 </LinearLayout>

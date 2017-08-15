@@ -1,6 +1,9 @@
 package com.example.hasnaa.orangelabstask;
 
 
+import android.app.IntentService;
+import android.app.SearchManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,12 +13,15 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
+//import android.widget.SearchView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -35,43 +41,39 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
 
     RecyclerView recyclerView;
-    ImageButton searchButton ;
-    EditText editText;
+
     TextView emptyView;
 
-
+    SearchView searchView;
+    ProgressBar loadingIndicator;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        searchView = (SearchView)findViewById(R.id.search1);
+        emptyView=(TextView)findViewById(R.id.empty_view);
+        loadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        editText=(EditText)findViewById(R.id.search_word);
-        emptyView = (TextView)findViewById(R.id.empty_view);
-        searchButton=(ImageButton)findViewById(R.id.search_button);
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            public boolean onQueryTextSubmit(String query) {
                 try {
-                    makeSearchQuery(editText.getText().toString());
+                    makeSearchQuery(query.trim());
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
+                    return false;
                 }
                 getSupportLoaderManager().initLoader(IMAGE_SEARCH_LOADER, null,MainActivity.this);
+                return true;
+            }
 
-
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
             }
         });
+
         recyclerView= (RecyclerView)findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -81,14 +83,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -100,8 +101,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void makeSearchQuery(String tag) throws MalformedURLException {
-        final String url = " https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&nojsoncallback=1&api_sig=56fd8d8bcee344e28c01b4279df0cf23&api_key=b16406e6933dcb70b73a9e933a094c01&tags=";
-        tag ="cat" ;
+        final String url = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=94b5b8ed24d00fd1af9f886b0a1f44cc&format=json&nojsoncallback=1&tags=";
+        //tag =searchWord ;
         Bundle queryBundle = new Bundle();
         queryBundle.putString(SEARCH_QUERY_URL_EXTRA, url+tag);
         LoaderManager loaderManager = getSupportLoaderManager();
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     return;
                 }
 
-//                mLoadingIndicator.setVisibility(View.VISIBLE);
+                loadingIndicator.setVisibility(View.VISIBLE);
 //
                 forceLoad();
             }
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<ArrayList<String>> loader, ArrayList<String> data) {
-
+        loadingIndicator.setVisibility(View.INVISIBLE);
         if (data == null) {
             recyclerView.setVisibility(View.GONE);
             emptyView.setVisibility(View.VISIBLE);
